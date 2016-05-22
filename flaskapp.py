@@ -35,7 +35,7 @@ def messageHandler():
     elif (bodyList[0] == "UNSUBSCRIBE"):
         retStr = unsubscribeTicker(bodyList)
     else:
-  	    retStr = getPrice(bodyList, from_number)
+        retStr = getPrice(bodyList, from_number)
 
     resp = twilio.twiml.Response()
     resp.message(retStr)
