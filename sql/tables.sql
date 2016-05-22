@@ -1,0 +1,4 @@
+CREATE TABLE last_lookup (
+	phone VARCHAR(30) PRIMARY KEY,
+	ticker VARCHAR(30) NOT NULL
+);
