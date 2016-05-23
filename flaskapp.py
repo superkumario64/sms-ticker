@@ -20,7 +20,7 @@ app.config['MYSQL_DATABASE_PORT'] = 3306
 
 mysql.init_app(app)
   
-@app.route('/messageHandler',methods=['GET', 'POST'])
+@app.route('/messageHandler',methods=['POST'])
 def messageHandler():
     from_number = request.values.get('From', None)
     body = request.values.get('Body')
