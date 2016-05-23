@@ -1,13 +1,11 @@
 from flask import Flask, request, redirect
 from twilio.rest import TwilioRestClient
-from googlefinance import getQuotes
 from yahoo_finance import Share
 from flask.ext.mysql import MySQL
 import json
 import requests
 import os
 import twilio.twiml
-import unicodedata
 import logging
 logging.basicConfig(filename='/var/www/html/error.log',level=logging.DEBUG)
 app = Flask(__name__)
@@ -47,16 +45,15 @@ def moreInfo(from_number):
     q = '''SELECT * FROM last_lookup WHERE phone = %s'''
     cur.execute(q,[from_number])
     rv = cur.fetchone()
-    try:
-        quote = Share(str(rv[1]))
-        prevClose = quote.get_prev_close()
-        openPrice = quote.get_open()
-        volume = quote.get_volume()
-        logging.debug(quote)
-    except:
-        retStr = "ticker not found"
-    else:
+    quote = Share(str(rv[1]))
+    prevClose = quote.get_prev_close()
+    openPrice = quote.get_open()
+    volume = quote.get_volume()
+    logging.debug(quote)
+    if prevClose:
         retStr = "PrevClose: "+prevClose+" OpenPrice: "+openPrice+" Volume: "+ volume
+    else:
+        retStr = "ticker still not found"
     
     return retStr
 
@@ -69,13 +66,12 @@ def unsubscribeTicker(bodyList):
 def getPrice(bodyList, from_number):
     retStr = ""
     for ticker in bodyList:
-        try:
-            quote = Share(str(ticker))
-            price = quote.get_price()
-        except:
-            retStr += ", ticker not found"
-        else:
+        quote = Share(str(ticker))
+        price = quote.get_price()
+        if price:
             retStr += ", " + ticker + " Price: " + price
+        else:
+            retStr += ", ticker not found"
         
         conn = mysql.connect()
         cur = conn.cursor()
@@ -91,18 +87,6 @@ def getPrice(bodyList, from_number):
             conn.rollback()
     retStr = retStr[2:]
     return retStr
-
-
-def getTickerPrice(ticker):
-    try:
-        quote = getQuotes(str(ticker))
-        price = quote[0]["LastTradePrice"]
-    except:
-        retStr = "ticker not found"
-    else:
-        retStr = ticker + " Price: " + price
-    return retStr
-
 
 if __name__ == '__main__':
     app.run(debug=True)
