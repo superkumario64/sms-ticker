@@ -2,6 +2,7 @@ from flask import Flask, request, redirect
 from twilio.rest import TwilioRestClient
 from yahoo_finance import Share
 from flask.ext.mysql import MySQL
+from datetime import datetime
 import json
 import requests
 import os
@@ -29,7 +30,7 @@ def messageHandler():
     if (bodyList[0] == "MORE"):
         retStr = moreInfo(from_number)
     elif (bodyList[0] == "SUBSCRIBE"):
-        retStr = subscribeTicker(bodyList)
+        retStr = subscribeTicker(bodyList, from_number)
     elif (bodyList[0] == "UNSUBSCRIBE"):
         retStr = unsubscribeTicker(bodyList)
     else:
@@ -57,8 +58,36 @@ def moreInfo(from_number):
     
     return retStr
 
-def subscribeTicker(bodyList):
-    return "Subscribe to ticker " + bodyList[1]
+def subscribeTicker(bodyList, from_number):
+    try:
+        ticker = bodyList[1]
+    except IndexError:
+        return "please specify ticker symbol"
+    quote = Share(str(ticker))
+    price = quote.get_price()
+    if price:
+        try:
+            send_time = bodyList[2]
+        except IndexError:
+            send_time = "8:30AM"
+        try:
+            datetime.strptime(send_time, '%I:%M%p')
+            conn = mysql.connect()
+            cur = conn.cursor()
+            q = '''INSERT INTO scheduled_sends (phone, ticker, send_time)
+                       VALUES(%s, %s, %s)
+                '''
+            try:
+                cur.execute(q,(from_number,ticker,send_time))
+                conn.commit()
+                return "Successfully subscribed to " + ticker + " at " + send_time
+            except:
+                conn.rollback()
+                return "mysql error"
+        except ValueError:
+                return "please enter a valid time HH:MM{AM/PM}"
+    
+    return "could not find ticker"
 
 def unsubscribeTicker(bodyList):
     return "Unsubscribe to ticker " + bodyList[1]
