@@ -67,27 +67,29 @@ def unsubscribeTicker(bodyList):
     return "Unsubscribe to ticker " + bodyList[1]
 
 def getPrice(bodyList, from_number):
-    try:
-        quote = getQuotes(str(bodyList[0]))
-        price = quote[0]["LastTradePrice"]
-    except:
-        retStr = "ticker not found"
-    else:
-        retStr = bodyList[0] + " Price: " + price
-
-    conn = mysql.connect()
-    cur = conn.cursor()
-    q = '''INSERT INTO last_lookup (phone, ticker)
-               VALUES (%s, %s)
-               ON DUPLICATE KEY UPDATE
-               ticker = VALUES(ticker)
-        '''
-    try:
-        cur.execute(q,(from_number,bodyList[0]))
-        conn.commit()
-    except:
-        conn.rollback()
-
+    retStr = ""
+    for ticker in bodyList:
+        try:
+            quote = Share(str(ticker))
+            price = quote.get_price()
+        except:
+            retStr += ", ticker not found"
+        else:
+            retStr += ", " + ticker + " Price: " + price
+        
+        conn = mysql.connect()
+        cur = conn.cursor()
+        q = '''INSERT INTO last_lookup (phone, ticker)
+                   VALUES (%s, %s)
+                   ON DUPLICATE KEY UPDATE
+                   ticker = VALUES(ticker)
+            '''
+        try:
+            cur.execute(q,(from_number,ticker))
+            conn.commit()
+        except:
+            conn.rollback()
+    retStr = retStr[2:]
     return retStr
 
 
