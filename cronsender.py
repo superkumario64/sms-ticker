@@ -10,6 +10,7 @@ import twilio.twiml
 import logging
 logging.basicConfig(filename='/var/www/html/cron_error.log',level=logging.DEBUG)
 app = Flask(__name__)
+
 mysql = MySQL()
 
 app.config['MYSQL_DATABASE_USER'] = 'root'
