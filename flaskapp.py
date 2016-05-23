@@ -32,7 +32,7 @@ def messageHandler():
     elif (bodyList[0] == "SUBSCRIBE"):
         retStr = subscribeTicker(bodyList, from_number)
     elif (bodyList[0] == "UNSUBSCRIBE"):
-        retStr = unsubscribeTicker(bodyList)
+        retStr = unsubscribeTicker(bodyList, from_number)
     else:
         retStr = getPrice(bodyList, from_number)
 
@@ -89,8 +89,33 @@ def subscribeTicker(bodyList, from_number):
     
     return "could not find ticker"
 
-def unsubscribeTicker(bodyList):
-    return "Unsubscribe to ticker " + bodyList[1]
+def unsubscribeTicker(bodyList, from_number):
+    try:
+        ticker = bodyList[1]
+    except IndexError:
+        return "please specify ticker symbol to unsubscribe. Use 'unsubscribe everything' remove all subscriptions"
+    if ticker == 'EVERYTHING':
+        conn = mysql.connect()
+        cur = conn.cursor()
+        q = '''UPDATE scheduled_sends SET active = 0 WHERE phone = %s'''
+        try:
+            cur.execute(q,[from_number])
+            conn.commit()
+            return "Successfully unsubscribed to everything"
+        except:
+            conn.rollback()
+            return "mysql error"
+    else:
+        conn = mysql.connect()
+        cur = conn.cursor()
+        q = '''UPDATE scheduled_sends SET active = 0 WHERE phone = %s AND ticker = %s'''
+        try:
+            cur.execute(q,[from_number, ticker])
+            conn.commit()
+            return "Successfully unsubscribed to " + ticker
+        except:
+            conn.rollback()
+            return "mysql error"
 
 def getPrice(bodyList, from_number):
     retStr = ""
