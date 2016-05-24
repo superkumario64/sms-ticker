@@ -21,6 +21,8 @@ app.config['MYSQL_DATABASE_PORT'] = DB_PORT
 
 mysql.init_app(app)
   
+#this is the route that is setup at the twilio webhook
+#it splits up the body of the sms and calls the appropriate function
 @app.route('/messageHandler',methods=['POST'])
 def messageHandler():
     from_number = request.values.get('From', None)
@@ -41,6 +43,8 @@ def messageHandler():
     resp.message(retStr)
     return str(resp)
 
+#if the keyword 'more' is detected we lookup the last ticker
+#that a user used in a price lookup and send the user more info on that ticker
 def moreInfo(from_number):
     conn = mysql.connect()
     cur = conn.cursor()
@@ -59,6 +63,10 @@ def moreInfo(from_number):
     
     return retStr
 
+#The subscribe method can be used by just hitting 'subscribe {ticker}'
+#it can also take an optional time argument after the ticker symbol
+#if no time is provided it defaults to 8:30 AM Pacific Time
+#(all times are pacific time)
 def subscribeTicker(bodyList, from_number):
     try:
         ticker = bodyList[1]
@@ -90,6 +98,8 @@ def subscribeTicker(bodyList, from_number):
     
     return "could not find ticker"
 
+#The unsubscribe feature can be used 'unsubscribe {ticker}' to unsub from all your subscriptions to that ticker
+#you can also hit 'unsubscribe everything' to unsubscribe to all of your subscriptions
 def unsubscribeTicker(bodyList, from_number):
     try:
         ticker = bodyList[1]
@@ -118,6 +128,8 @@ def unsubscribeTicker(bodyList, from_number):
             conn.rollback()
             return "mysql error"
 
+#loops through and gets the prices of all the tickers provided
+#the last ticker to be looked up will the the ticker used in the more feature
 def getPrice(bodyList, from_number):
     retStr = ""
     for ticker in bodyList:

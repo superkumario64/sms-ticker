@@ -10,4 +10,4 @@ CREATE TABLE scheduled_sends (
     sent INT(11) DEFAULT 0,
     active INT(11) DEFAULT 1,
     PRIMARY KEY (phone, ticker, send_time)
-)
+);

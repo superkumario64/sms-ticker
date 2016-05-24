@@ -22,6 +22,8 @@ app.config['MYSQL_DATABASE_PORT'] = DB_PORT
 
 mysql.init_app(app)
 
+#once a night at midnight we reset all the scheduled_sends to sent=0
+#this sets them up to be sent out for the next day
 conn = mysql.connect()
 cur = conn.cursor()
 q = '''UPDATE scheduled_sends SET sent = 0 WHERE active = 1'''
