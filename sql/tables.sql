@@ -8,5 +8,6 @@ CREATE TABLE scheduled_sends (
     ticker VARCHAR(30) NOT NULL,
     send_time VARCHAR(30) NOT NULL,
     sent INT(11) DEFAULT 0,
-    active INT(11) DEFAULT 1
+    active INT(11) DEFAULT 1,
+    PRIMARY KEY (phone, ticker, send_time)
 )
