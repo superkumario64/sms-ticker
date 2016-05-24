@@ -9,18 +9,16 @@ import requests
 import os
 import twilio.twiml
 import logging
+from creds import *
 logging.basicConfig(filename='/var/www/html/cron_error.log',level=logging.DEBUG)
 app = Flask(__name__)
 mysql = MySQL()
 
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
-app.config['MYSQL_DATABASE_DB'] = 'sms_ticker'
-app.config['MYSQL_DATABASE_HOST'] = '127.0.0.1'
-app.config['MYSQL_DATABASE_PORT'] = 3306
-account_sid = "AC427ba42c195ad5c939af0b8b92a6fd28"
-auth_token = "ab9c7fbcb552d6d06ba14f58585680dd"
-
+app.config['MYSQL_DATABASE_USER'] = DB_USER
+app.config['MYSQL_DATABASE_PASSWORD'] = DB_PASSWORD
+app.config['MYSQL_DATABASE_DB'] = DB_NAME
+app.config['MYSQL_DATABASE_HOST'] = DB_HOST
+app.config['MYSQL_DATABASE_PORT'] = DB_PORT
 
 mysql.init_app(app)
 

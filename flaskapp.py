@@ -3,6 +3,7 @@ from twilio.rest import TwilioRestClient
 from yahoo_finance import Share
 from flask.ext.mysql import MySQL
 from datetime import datetime
+from creds import *
 import json
 import requests
 import os
@@ -12,11 +13,11 @@ logging.basicConfig(filename='/var/www/html/error.log',level=logging.DEBUG)
 app = Flask(__name__)
 mysql = MySQL()
 
-app.config['MYSQL_DATABASE_USER'] = 'root'
-app.config['MYSQL_DATABASE_PASSWORD'] = 'root'
-app.config['MYSQL_DATABASE_DB'] = 'sms_ticker'
-app.config['MYSQL_DATABASE_HOST'] = '127.0.0.1'
-app.config['MYSQL_DATABASE_PORT'] = 3306
+app.config['MYSQL_DATABASE_USER'] = DB_USER
+app.config['MYSQL_DATABASE_PASSWORD'] = DB_PASSWORD
+app.config['MYSQL_DATABASE_DB'] = DB_NAME
+app.config['MYSQL_DATABASE_HOST'] = DB_HOST
+app.config['MYSQL_DATABASE_PORT'] = DB_PORT
 
 mysql.init_app(app)
   
