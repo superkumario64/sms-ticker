@@ -22,20 +22,26 @@ app.config['MYSQL_DATABASE_PORT'] = DB_PORT
 
 mysql.init_app(app)
 
+
+#This cron job runs every minute and sends emails at an appropriate time
+
+
 #This is the same getPrice fxn from flaskapp.py
 #I am still looking into how to make this more DRY and only live in one place
 def getPrice(bodyList, from_number):
     retStr = ""
+    #interate over bodyList
     for ticker in bodyList:
-        print ticker
-        print from_number
         quote = Share(str(ticker))
         price = quote.get_price()
+        #construct return string with price ticker if found
+        #appended the comma and space in the front, will remove preceeding comma after loop
         if price:
             retStr += ", " + ticker + " Price: " + price
         else:
             retStr += ", ticker not found"
         
+        #update last_lookup field so the "more info" feature works
         conn = mysql.connect()
         cur = conn.cursor()
         q = '''INSERT INTO last_lookup (phone, ticker)
@@ -48,6 +54,8 @@ def getPrice(bodyList, from_number):
             conn.commit()
         except:
             conn.rollback()
+    
+    #strip preceeding comma and space
     retStr = retStr[2:]
     return retStr
 
